@@ -1,0 +1,1 @@
+﻿CREATE NONCLUSTERED INDEX [IX_SendDate] ON [dbo].[Notifications]([SendDate] ASC)
