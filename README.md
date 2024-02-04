@@ -11,3 +11,4 @@ Hopefully, we will reach 1 million notifications per minute. Each step of the jo
 ## Running the project
  - Download the source code
  - Execute `docker-compose up` to start the required services
+ - Run the project
