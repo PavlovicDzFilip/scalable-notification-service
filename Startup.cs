@@ -29,7 +29,7 @@ public static class Startup
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUpgradeLog, LoggerAdapter>();
 
-        services.AddSingleton<SimpleNotificationSender>();
+        services.AddSingleton<MultithreadedPartitionedNotificationSender>();
 
         return services.BuildServiceProvider();
     }

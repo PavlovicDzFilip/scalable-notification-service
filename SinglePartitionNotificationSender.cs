@@ -4,9 +4,11 @@ using Notifications.Infrastructure;
 
 namespace Notifications;
 
-public class SimpleNotificationSender(
+public class SinglePartitionNotificationSender(
     IServiceProvider serviceProvider,
-    IEmailService emailService)
+    IEmailService emailService,
+    int partitionKey,
+    int numberOfPartitions)
 {
     public async Task<int> Send(CancellationToken cancellationToken)
     {
@@ -25,7 +27,11 @@ public class SimpleNotificationSender(
     {
         await using var scope = serviceProvider.CreateAsyncScope();
         await using var dbContext = scope.ServiceProvider.GetRequiredService<NotificationContext>();
-        var notification = await dbContext.Notifications.FirstOrDefaultAsync(x => x.SendDate < DateTime.UtcNow);
+        var notification = await dbContext.Notifications
+            .FirstOrDefaultAsync(x =>
+                x.Id % numberOfPartitions == partitionKey && x
+                .SendDate < DateTime.UtcNow);
+
         if (notification is null)
         {
             return false;

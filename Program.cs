@@ -10,7 +10,7 @@ var serviceProvider = Startup.Configure(config);
 var deployment = serviceProvider.GetRequiredService<Deployment>();
 deployment.DeployInfrastructure();
 
-var sender = serviceProvider.GetRequiredService<SimpleNotificationSender>();
+var sender = serviceProvider.GetRequiredService<MultithreadedPartitionedNotificationSender>();
 var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
 var notificationsSent = await sender.Send(cancellationTokenSource.Token);
 
