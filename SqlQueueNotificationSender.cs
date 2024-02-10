@@ -4,11 +4,9 @@ using Notifications.Infrastructure;
 
 namespace Notifications;
 
-public class SinglePartitionNotificationSender(
+public class SqlQueueNotificationSender(
     IServiceProvider serviceProvider,
-    IEmailService emailService,
-    int partitionKey,
-    int numberOfPartitions)
+    IEmailService emailService)
 {
     public async Task<int> Send(CancellationToken cancellationToken)
     {
@@ -27,13 +25,14 @@ public class SinglePartitionNotificationSender(
     {
         await using var scope = serviceProvider.CreateAsyncScope();
         await using var dbContext = scope.ServiceProvider.GetRequiredService<NotificationContext>();
+        var transaction = await dbContext.Database.BeginTransactionAsync();
         var notification = await dbContext.Notifications
-            .FirstOrDefaultAsync(x =>
-                x.Id % numberOfPartitions == partitionKey && x
-                .SendDate < DateTime.UtcNow);
+            .FromSqlInterpolated($"SELECT TOP 1 * FROM Notifications WITH(UPDLOCK, READPAST) WHERE SendDate < {DateTime.UtcNow} ORDER BY SendDate")
+            .FirstOrDefaultAsync();
 
         if (notification is null)
         {
+            await transaction.RollbackAsync();
             return false;
         }
 
@@ -46,6 +45,7 @@ public class SinglePartitionNotificationSender(
         });
 
         await dbContext.SaveChangesAsync();
+        await transaction.CommitAsync();
         return true;
     }
 }

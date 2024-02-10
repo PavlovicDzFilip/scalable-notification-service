@@ -10,9 +10,11 @@ var serviceProvider = Startup.Configure(config);
 var deployment = serviceProvider.GetRequiredService<Deployment>();
 deployment.DeployInfrastructure();
 
-var sender = serviceProvider.GetRequiredService<MultithreadedPartitionedNotificationSender>();
+var sender = serviceProvider.GetRequiredService<ScalableNotificationSender>();
 var cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromMinutes(1));
 var notificationsSent = await sender.Send(cancellationTokenSource.Token);
 
 var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
 logger.LogWarning("Sending notifications end. Total notifications sent: {notificationsSent}", notificationsSent);
+
+await Task.Delay(-1);

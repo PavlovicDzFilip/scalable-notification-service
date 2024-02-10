@@ -2,19 +2,19 @@
 
 namespace Notifications;
 
-public class MultithreadedPartitionedNotificationSender
+public class ScalableNotificationSender
 {
-    private readonly SinglePartitionNotificationSender[] _senders;
+    private readonly SqlQueueNotificationSender[] _senders;
 
-    public MultithreadedPartitionedNotificationSender(
+    public ScalableNotificationSender(
         IServiceProvider serviceProvider,
         IEmailService emailService,
         IConfiguration configuration)
     {
         var numberOfPartitions = configuration.GetValue<int>("NumberOfPartitions");
         _senders = Enumerable.Range(0, numberOfPartitions)
-        .Select(x => new SinglePartitionNotificationSender(serviceProvider, emailService, x, numberOfPartitions))
-        .ToArray();
+            .Select(x => new SqlQueueNotificationSender(serviceProvider, emailService))
+            .ToArray();
     }
 
     public async Task<int> Send(CancellationToken cancellationToken)
