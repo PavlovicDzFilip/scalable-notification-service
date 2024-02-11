@@ -1,0 +1,70 @@
+version: '3.3'
+services:
+  consumer:
+    image: pavlovicdzfilip/notifications:consumer.10
+    environment:
+      CONNECTIONSTRINGS__SQLSERVER: Server=db;Database=Notifications;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True
+      CONNECTIONSTRINGS__MessageBroker: amqp://rabbit
+      NumberOfHandlers: '192'
+    networks:
+     - net
+    depends_on: 
+     - db
+     - rabbit
+    logging:
+      driver: json-file
+    deploy:
+      replicas: 2
+      placement:
+        constraints:
+         - node.labels.hosts_consumer == true
+
+  producer:
+    image: pavlovicdzfilip/notifications:producer.11
+    environment:
+      CONNECTIONSTRINGS__MessageBroker: amqp://rabbit
+      CONNECTIONSTRINGS__SQLSERVER: Server=db;Database=Notifications;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True
+    networks:
+     - net
+    logging:
+      driver: json-file
+    depends_on: 
+     - consumer
+     - db
+     - rabbit
+    deploy:
+      placement:
+        constraints:
+         - node.labels.hosts_producer == true
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      ACCEPT_EULA: 'Y'
+      MSSQL_SA_PASSWORD: yourStrong(!)Password
+    ports:
+     - 1433:1433
+    networks:
+     - net
+    logging:
+      driver: json-file
+    deploy:
+      placement:
+        constraints:
+         - node.labels.hosts_database == true
+
+  rabbit:
+    image: rabbitmq:3-management
+    ports:
+     - 8080:15672
+    networks:
+     - net
+    logging:
+      driver: json-file
+    deploy:
+      placement:
+        constraints:
+         - node.labels.hosts_rabbit == true
+networks:
+  net:
+    driver: overlay

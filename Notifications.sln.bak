@@ -3,11 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Shared", "Shared\Shared.csproj", "{78D27D93-86B6-4F39-BC69-2C959A070E60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notifications", "Notifications.csproj", "{F304F758-84E3-4FA3-8CFA-005DB22492DF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Producer", "Producer\Producer.csproj", "{53E7656F-C812-4BA0-A655-B52302D0858A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{78D27D93-86B6-4F39-BC69-2C959A070E60}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Consumer", "Consumer\Consumer.csproj", "{6F3D1C5B-653F-4B35-B930-CBF803B38050}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Producer", "Producer\Producer.csproj", "{53E7656F-C812-4BA0-A655-B52302D0858A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Consumer", "Consumer\Consumer.csproj", "{6F3D1C5B-653F-4B35-B930-CBF803B38050}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F304F758-84E3-4FA3-8CFA-005DB22492DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F304F758-84E3-4FA3-8CFA-005DB22492DF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F304F758-84E3-4FA3-8CFA-005DB22492DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F304F758-84E3-4FA3-8CFA-005DB22492DF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{78D27D93-86B6-4F39-BC69-2C959A070E60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{78D27D93-86B6-4F39-BC69-2C959A070E60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78D27D93-86B6-4F39-BC69-2C959A070E60}.Release|Any CPU.ActiveCfg = Release|Any CPU

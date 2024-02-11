@@ -1,4 +1,4 @@
-﻿namespace Notifications;
+﻿namespace Notifications.Consumer;
 
 public interface IEmailService
 {

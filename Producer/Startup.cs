@@ -26,10 +26,9 @@ public static class Startup
         services.AddSingleton(configuration);
 
         services.AddSingleton<Deployment>();
-        services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IUpgradeLog, LoggerAdapter>();
 
-        services.AddSingleton<ScalableNotificationSender>();
+        services.AddSingleton<MessageProducer>();
 
         return services.BuildServiceProvider();
     }

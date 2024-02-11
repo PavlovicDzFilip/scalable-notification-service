@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>preview</LangVersion>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
-    <DockerfileContext>.</DockerfileContext>
+  	<RootNamespace>Notifications.Shared</RootNamespace>
+	<AssemblyName>Notifications.Shared</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,9 +16,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Infrastructure\SqlScripts\003 - Create IX_SendDate index on Notifications.sql" />
-    <EmbeddedResource Include="Infrastructure\SqlScripts\002 - Create NotificationLogs table.sql" />
     <EmbeddedResource Include="Infrastructure\SqlScripts\001 - Create Notifications table.sql" />
+    <EmbeddedResource Include="Infrastructure\SqlScripts\002 - Create NotificationLogs table.sql" />
+    <EmbeddedResource Include="Infrastructure\SqlScripts\003 - Create IX_SendDate index on Notifications.sql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 	<ItemGroup>
@@ -30,12 +35,7 @@
 		<PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Console" Version="8.0.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.4" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Update="appsettings.json">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
+		<PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
 	</ItemGroup>
 
 </Project>

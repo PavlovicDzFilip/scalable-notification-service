@@ -6,16 +6,17 @@ WORKDIR /app
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["Notifications.csproj", "."]
-RUN dotnet restore "./Notifications.csproj"
+COPY ["Consumer/Consumer.csproj", "Consumer/"]
+COPY ["Shared/Shared.csproj", "Shared/"]
+RUN dotnet restore "Consumer/Consumer.csproj"
 COPY . .
-WORKDIR "/src/."
-RUN dotnet build "Notifications.csproj" -c Release -o /app/build
+WORKDIR "/src/Consumer"
+RUN dotnet build "Consumer.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Notifications.csproj" -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "Consumer.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Notifications.dll"]
+ENTRYPOINT ["dotnet", "Notifications.Consumer.dll"]
