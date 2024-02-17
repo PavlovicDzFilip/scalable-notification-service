@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using RabbitMQ.Client;
-using System.Threading;
 
 namespace Notifications.Consumer;
 
@@ -18,11 +18,16 @@ public class MessageConsumer(
         };
 
         var numberOfHandlers = configuration.GetValue<int>("NumberOfHandlers");
+        var qos = configuration.GetValue<ushort>("HandlerQoS");
         var killswitch = new KillSwitch();
 
+        var notificationLogCache = serviceProvider.GetRequiredService<INotificationLogCache>();
+        var serializer = serviceProvider.GetRequiredService<ISerializer>();
         using var connection = factory.CreateConnection();
+
+
         var consumers = Enumerable.Range(0, numberOfHandlers)
-            .Select(_ => new NotificationSender(serviceProvider, emailService, connection, killswitch))
+            .Select(_ => new NotificationSender(emailService, connection, serializer, notificationLogCache, killswitch, qos))
             .ToList();
 
         try
@@ -30,7 +35,6 @@ public class MessageConsumer(
             await Task.Delay(-1, killswitch.CancellationToken);
         }
         catch { }
-
 
         var messagesHandled = consumers.Sum(x => x.MessagesHandled);
         consumers.ForEach(x => x.Dispose());

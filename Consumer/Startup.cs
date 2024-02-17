@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Notifications.Infrastructure;
+using StackExchange.Redis;
 
 namespace Notifications.Consumer;
 
@@ -31,6 +32,15 @@ public static class Startup
         services.AddScoped<IUpgradeLog, LoggerAdapter>();
 
         services.AddSingleton<MessageConsumer>();
+        services.AddSingleton<ISerializer, MessagePackSerializer>();
+        services.AddSingleton((Func<IServiceProvider, INotificationLogCache>)(x =>
+        {
+            var redisConnectionString = configuration.GetConnectionString("RedisCache")!;
+            var redis = ConnectionMultiplexer.Connect(redisConnectionString);
+            IDatabase db = redis.GetDatabase();
+            var serializer = x.GetRequiredService<ISerializer>();
+            return new RedisNotificationLogCache(db, serializer);
+        }));
 
         return services.BuildServiceProvider();
     }

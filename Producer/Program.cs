@@ -11,7 +11,7 @@ var logger = serviceProvider.GetRequiredService<ILogger<Program>>();
 
 #if !DEBUG
 logger.LogWarning("Waiting for other services to start");
-await Task.Delay(TimeSpan.FromMinutes(1));
+await Task.Delay(TimeSpan.FromSeconds(30));
 logger.LogWarning("Waiting for other services to start complete");
 #endif
 
@@ -22,5 +22,3 @@ var notificationsSent = await producer.Send(cancellationTokenSource.Token);
 
 
 logger.LogWarning("Sent {notificationsSent} messages to the queue", notificationsSent);
-
-await Task.Delay(-1);

@@ -29,7 +29,8 @@ public static class Startup
         services.AddScoped<IUpgradeLog, LoggerAdapter>();
 
         services.AddSingleton<MessageProducer>();
-
+        services.AddSingleton<ISerializer, MessagePackSerializer>();
+        
         return services.BuildServiceProvider();
     }
 

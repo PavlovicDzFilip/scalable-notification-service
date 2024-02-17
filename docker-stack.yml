@@ -1,29 +1,36 @@
 version: '3.3'
 services:
   consumer:
-    image: pavlovicdzfilip/notifications:consumer.10
+    image: pavlovicdzfilip/notifications:consumer.13
     environment:
       CONNECTIONSTRINGS__SQLSERVER: Server=db;Database=Notifications;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True
       CONNECTIONSTRINGS__MessageBroker: amqp://rabbit
-      NumberOfHandlers: '192'
+      CONNECTIONSTRINGS__RedisCache: cache
+      NumberOfHandlers: '96'
+      HandlerQoS:  100
+    restart: "no"
     networks:
      - net
     depends_on: 
      - db
      - rabbit
+     - cache
     logging:
       driver: json-file
     deploy:
-      replicas: 2
+      replicas: 3
       placement:
         constraints:
          - node.labels.hosts_consumer == true
 
   producer:
-    image: pavlovicdzfilip/notifications:producer.11
+    image: pavlovicdzfilip/notifications:producer.14
     environment:
       CONNECTIONSTRINGS__MessageBroker: amqp://rabbit
       CONNECTIONSTRINGS__SQLSERVER: Server=db;Database=Notifications;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True
+      CONNECTIONSTRINGS__RedisCache: cache
+      BatchSize: 10000
+    restart: "no"
     networks:
      - net
     logging:
@@ -32,7 +39,9 @@ services:
      - consumer
      - db
      - rabbit
+     - cache
     deploy:
+      replicas: 1
       placement:
         constraints:
          - node.labels.hosts_producer == true
@@ -65,6 +74,23 @@ services:
       placement:
         constraints:
          - node.labels.hosts_rabbit == true
+
+  cache:
+    image: redis:7.2.4-alpine
+    ports:
+      - 6379:6379
+    command: redis-server --save 1 1 --loglevel warning --appendonly yes --protected-mode no
+    volumes: 
+      - cache:/data
+    networks:
+     - net
+    deploy:
+      placement:
+        constraints:
+         - node.labels.hosts_redis == true
 networks:
   net:
     driver: overlay
+volumes:
+  cache:
+    driver: local

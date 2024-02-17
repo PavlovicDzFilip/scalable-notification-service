@@ -13,3 +13,13 @@ services:
     ports:
      - 8080:15672
      - 5672:5672
+  cache:
+    image: redis:7.2.4-alpine
+    ports:
+      - 6379:6379
+    command: redis-server --save 1 1 --loglevel warning --appendonly yes
+    volumes: 
+      - cache:/data
+volumes:
+  cache:
+    driver: local

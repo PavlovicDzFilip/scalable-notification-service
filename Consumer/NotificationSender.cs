@@ -1,43 +1,49 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Notifications.Infrastructure;
-using RabbitMQ.Client;
+﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System.Diagnostics;
-using System.Text;
-using System.Text.Json;
 
 namespace Notifications.Consumer;
 
 public class NotificationSender : AsyncEventingBasicConsumer, IDisposable
 {
-    private readonly IServiceProvider _serviceProvider;
     private readonly IEmailService _emailService;
+    private readonly ISerializer _serializer;
+    private readonly INotificationLogCache _notificationLogCache;
     private readonly KillSwitch _killSwitch;
 
     public int MessagesHandled { get; private set; }
 
     public NotificationSender(
-        IServiceProvider serviceProvider,
         IEmailService emailService,
         IConnection connection,
-        KillSwitch killSwitch) : 
+        ISerializer serializer,
+        INotificationLogCache notificationLogCache,
+        KillSwitch killSwitch,
+        ushort qos) :
         this(
-            serviceProvider, 
-            emailService, 
+            emailService,
             connection.CreateModel(),
-            killSwitch)
+            serializer,
+            notificationLogCache,
+            killSwitch,
+            qos)
     {
     }
 
-    private NotificationSender(IServiceProvider serviceProvider, IEmailService emailService, IModel channel, KillSwitch killSwitch)
+    private NotificationSender(
+        IEmailService emailService,
+        IModel channel,
+        ISerializer serializer,
+        INotificationLogCache notificationLogCache,
+        KillSwitch killSwitch,
+        ushort qos)
         : base(channel)
     {
-        _serviceProvider = serviceProvider;
         _emailService = emailService;
+        _serializer = serializer;
+        _notificationLogCache = notificationLogCache;
         _killSwitch = killSwitch;
         Received += OnReceived;
-        channel.BasicQos(0, 100, false);
+        channel.BasicQos(0, qos, false);
         var queueName = "notifications";
         channel.BasicConsume(queueName, false, this);
     }
@@ -58,26 +64,22 @@ public class NotificationSender : AsyncEventingBasicConsumer, IDisposable
 
     private async Task Send(BasicDeliverEventArgs @event)
     {
-        var notification = JsonSerializer.Deserialize<Notification>(Encoding.UTF8.GetString(@event.Body.Span))
+        var notification = _serializer.Deserialize<Notification>(@event.Body)
                          ?? throw new Exception();
 
-        await using var scope = _serviceProvider.CreateAsyncScope();
-        await using var dbContext = scope.ServiceProvider.GetRequiredService<NotificationContext>();
-
-        var isAlreadyHandled = await dbContext.NotificationLogs.AnyAsync(x => x.Id == notification.Id);
+        var isAlreadyHandled = await _notificationLogCache.IsHandledAsync(notification.Id);
         if (isAlreadyHandled)
         {
             return;
         }
 
         await _emailService.Send(notification.Payload);
-        dbContext.NotificationLogs.Add(new NotificationLog
+
+        await _notificationLogCache.AddAsync(new NotificationLog
         {
             Id = notification.Id,
             SentDate = DateTime.UtcNow
         });
-
-        await dbContext.SaveChangesAsync();
 
         MessagesHandled++;
     }
