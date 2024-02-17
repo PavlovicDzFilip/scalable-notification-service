@@ -22,3 +22,4 @@ var notificationsSent = await producer.Send(cancellationTokenSource.Token);
 
 
 logger.LogWarning("Sent {notificationsSent} messages to the queue", notificationsSent);
+await Task.Delay(-1);

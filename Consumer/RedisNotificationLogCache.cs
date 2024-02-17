@@ -6,7 +6,7 @@ public class RedisNotificationLogCache(
     IDatabase database,
     ISerializer serializer) : INotificationLogCache
 {
-    private readonly RedisKey _redisKey = new RedisKey("notifications");
+    private readonly RedisKey _redisKey = new("notifications");
     public async Task AddAsync(NotificationLog notificationLog)
     {
         var data = serializer.Serialize(notificationLog);

@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 using Notifications.Infrastructure;
 using RabbitMQ.Client;
 
@@ -61,12 +60,17 @@ public class MessageProducer
         var props = channel.CreateBasicProperties();
         props.DeliveryMode = 2; // Persistent
 
+        var batch = channel.CreateBasicPublishBatch();
         notifications
-            .ForEach(x =>
+            .Chunk(10)
+            .ToList()
+            .ForEach(chunk =>
             {
-                var messageBody = _serializer.Serialize(x);
-                channel.BasicPublish(string.Empty, "notifications", true, props, messageBody);
+                var messageBody = _serializer.Serialize(chunk);
+                batch.Add(string.Empty, "notifications", true, props, messageBody);
             });
+
+        batch.Publish();
 
         channel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(5));
 

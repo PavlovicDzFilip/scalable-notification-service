@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   consumer:
-    image: pavlovicdzfilip/notifications:consumer.13
+    image: pavlovicdzfilip/notifications:consumer.17
     environment:
       CONNECTIONSTRINGS__SQLSERVER: Server=db;Database=Notifications;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True
       CONNECTIONSTRINGS__MessageBroker: amqp://rabbit
@@ -24,12 +24,12 @@ services:
          - node.labels.hosts_consumer == true
 
   producer:
-    image: pavlovicdzfilip/notifications:producer.14
+    image: pavlovicdzfilip/notifications:producer.17
     environment:
       CONNECTIONSTRINGS__MessageBroker: amqp://rabbit
       CONNECTIONSTRINGS__SQLSERVER: Server=db;Database=Notifications;User Id=sa;Password=yourStrong(!)Password;TrustServerCertificate=True
       CONNECTIONSTRINGS__RedisCache: cache
-      BatchSize: 10000
+      BatchSize: 20000
     restart: "no"
     networks:
      - net

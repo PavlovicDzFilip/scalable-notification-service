@@ -64,24 +64,27 @@ public class NotificationSender : AsyncEventingBasicConsumer, IDisposable
 
     private async Task Send(BasicDeliverEventArgs @event)
     {
-        var notification = _serializer.Deserialize<Notification>(@event.Body)
+        var notifications = _serializer.Deserialize<Notification[]>(@event.Body)
                          ?? throw new Exception();
 
-        var isAlreadyHandled = await _notificationLogCache.IsHandledAsync(notification.Id);
-        if (isAlreadyHandled)
+        foreach (var notification in notifications)
         {
-            return;
+            var isAlreadyHandled = await _notificationLogCache.IsHandledAsync(notification.Id);
+            if (isAlreadyHandled)
+            {
+                continue;
+            }
+
+            await _emailService.Send(notification.Payload);
+
+            await _notificationLogCache.AddAsync(new NotificationLog
+            {
+                Id = notification.Id,
+                SentDate = DateTime.UtcNow
+            });
+
+            MessagesHandled++;
         }
-
-        await _emailService.Send(notification.Payload);
-
-        await _notificationLogCache.AddAsync(new NotificationLog
-        {
-            Id = notification.Id,
-            SentDate = DateTime.UtcNow
-        });
-
-        MessagesHandled++;
     }
 
     public void Dispose()

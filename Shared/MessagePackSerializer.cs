@@ -7,7 +7,7 @@ public class MessagePackSerializer : ISerializer
         return MessagePack.MessagePackSerializer.Deserialize<T>(data);
     }
 
-    public byte[] Serialize<T>(T data)
+    public ReadOnlyMemory<byte> Serialize<T>(T data)
     {
         return MessagePack.MessagePackSerializer.Serialize<T>(data);
     }

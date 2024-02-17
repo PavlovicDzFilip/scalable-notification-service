@@ -13,11 +13,13 @@
     <None Remove="Infrastructure\SqlScripts\001 - Create Notifications table.sql" />
     <None Remove="Infrastructure\SqlScripts\002 - Create NotificationLogs table.sql" />
     <None Remove="Infrastructure\SqlScripts\003 - Create IX_SendDate index on Notifications.sql" />
+    <None Remove="Infrastructure\SqlScripts\004 - Drop NotificationLogs  table.sql" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Infrastructure\SqlScripts\001 - Create Notifications table.sql" />
     <EmbeddedResource Include="Infrastructure\SqlScripts\002 - Create NotificationLogs table.sql" />
+    <EmbeddedResource Include="Infrastructure\SqlScripts\004 - Drop NotificationLogs  table.sql" />
     <EmbeddedResource Include="Infrastructure\SqlScripts\003 - Create IX_SendDate index on Notifications.sql" />
   </ItemGroup>
 
